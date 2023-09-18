@@ -3,11 +3,20 @@ import { Content, Overlay, Portal, Root, Title, Trigger } from "@radix-ui/react-
 import { type ChangeEventHandler, useState } from "react";
 
 import { ProfileImage } from "./profile-image";
+import { api } from "~/utils/api";
 
 export const CreatePostWizard = () => {
-  const [value, setValue] = useState<string>('');
+  const [value, setValue] = useState('');
   const [open, setOpen] = useState(false);
   const { user } = useUser()
+  const ctx = api.useContext()
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setValue("")
+      setOpen(false)
+      void ctx.posts.getAll.invalidate()
+    }
+  });
 
   const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (event) => {
     setValue(event.target.value)
@@ -16,6 +25,10 @@ export const CreatePostWizard = () => {
   const handleOpenChange = () => {
     setValue('');
     setOpen((value) => !value);
+  }
+
+  const handleSubmit = () => {
+    mutate({ content: value })
   }
 
   if (!user) return null;
@@ -39,20 +52,22 @@ export const CreatePostWizard = () => {
             <div className="flex flex-col w-full">
               <p className="col-start-2 font-bold">{username}</p>
               <textarea
-                className="col-start-2 w-full bg-transparent focus:outline-none resize-none font-['Apple_Color_Emoji']"
+                className="col-start-2 w-full bg-transparent focus:outline-none resize-none font-['Apple_Color_Emoji'] text-2xl"
                 placeholder="Type some emojis!!"
                 rows={6}
                 onChange={handleTextAreaChange}
                 value={value}
+                disabled={isPosting}
               />
             </div>
           </div>
           <button
             className="block ml-auto mt-4 rounded border px-4 py-1 border-slate-500 disabled:text-slate-500"
             type="button"
-            disabled={value.length === 0}
+            disabled={value.length === 0 || isPosting}
+            onClick={handleSubmit}
           >
-            Post
+            {isPosting ? 'Posting...' : 'Post'}
           </button>
         </Content>
       </Portal>
