@@ -7,7 +7,7 @@ import {
   Title,
   Trigger,
 } from "@radix-ui/react-dialog";
-import { type ChangeEventHandler, useState } from "react";
+import { type ChangeEventHandler, useState, KeyboardEventHandler } from "react";
 
 import { ProfileImage } from "./profile-image";
 import { api } from "~/utils/api";
@@ -62,6 +62,14 @@ export const CreatePostWizard = () => {
     setValue(event.target.value);
   };
 
+  const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
+    if (value.length <= 0) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      mutate({ content: value });
+    }
+  };
+
   const handleOpenChange = () => {
     setValue("");
     setInputError("");
@@ -104,6 +112,7 @@ export const CreatePostWizard = () => {
                 placeholder="Type some emojis!!"
                 rows={6}
                 onChange={handleTextAreaChange}
+                onKeyDown={handleKeyDown}
                 value={value}
                 disabled={isPosting}
               />
