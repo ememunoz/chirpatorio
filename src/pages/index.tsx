@@ -7,7 +7,7 @@ export default function Home() {
   const { data, isLoading: isLoadingPosts } = api.posts.getAll.useQuery();
   const { isSignedIn, isLoaded: isUserLoaded } = useUser();
 
-  if (!data) return <div>No data</div>;
+  if (!data && !isLoadingPosts) return <div>No data</div>;
 
   return (
     <>
