@@ -1,13 +1,16 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import { CreatePostWizard, LoadingSpinner, Post } from "~/components";
+import { LoadingSpinner, Post } from "~/components";
 import { api } from "~/utils/api";
 import Head from "next/head";
 
-export default function Home() {
+export default function SinglePostPage() {
   const { data, isLoading: isLoadingPosts } = api.posts.getAll.useQuery();
-  const { isSignedIn, isLoaded: isUserLoaded } = useUser();
+  const { isSignedIn } = useUser();
 
   if (!data && !isLoadingPosts) return <div>No data</div>;
+  if (!data) return;
+  if (data.length < 0) return;
+  const post = data[0]!;
 
   return (
     <>
@@ -22,22 +25,13 @@ export default function Home() {
       </nav>
       <main className="wrapper relative top-[74px]">
         <div className="flex flex-col gap-4 p-4">
-          {isUserLoaded ? (
-            <CreatePostWizard />
-          ) : (
-            <div className="grid">
-              <LoadingSpinner className="place-self-center" />
-            </div>
-          )}
           {isLoadingPosts ? (
             <div className="grid">
               <LoadingSpinner className="place-self-center" />
             </div>
           ) : (
             <div>
-              {data.map((post) => (
-                <Post key={post.post.id} {...post} />
-              ))}
+              <Post {...post} />
             </div>
           )}
         </div>
