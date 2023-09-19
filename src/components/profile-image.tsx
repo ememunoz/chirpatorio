@@ -7,8 +7,20 @@ type ProfileImageProps = {
   src: string;
   alt?: string;
   className?: string;
-}
+};
 
-export const ProfileImage = ({ width = 36, height = 36, src, alt = "", className = "" }: ProfileImageProps) => (
-  <Image width={width} height={height} src={src} alt={alt} className={twMerge('rounded-full', className)} />
-)
+export const ProfileImage = ({
+  width = 36,
+  height = 36,
+  src,
+  alt = "",
+  className = "",
+}: ProfileImageProps) => (
+  <Image
+    width={width}
+    height={height}
+    src={src}
+    alt={alt}
+    className={twMerge("rounded-full", className)}
+  />
+);

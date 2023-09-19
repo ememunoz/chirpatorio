@@ -1,76 +1,131 @@
 import { useUser } from "@clerk/nextjs";
-import { Content, Overlay, Portal, Root, Title, Trigger } from "@radix-ui/react-dialog"
+import {
+  Content,
+  Overlay,
+  Portal,
+  Root,
+  Title,
+  Trigger,
+} from "@radix-ui/react-dialog";
 import { type ChangeEventHandler, useState } from "react";
 
 import { ProfileImage } from "./profile-image";
 import { api } from "~/utils/api";
+import { Toast } from "./toast";
 
 export const CreatePostWizard = () => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
-  const { user } = useUser()
-  const ctx = api.useContext()
+  const [inputError, setInputError] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const { user } = useUser();
+  const ctx = api.useContext();
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
-      setValue("")
-      setOpen(false)
-      void ctx.posts.getAll.invalidate()
-    }
+      setValue("");
+      setInputError("");
+      setOpen(false);
+      void ctx.posts.getAll.invalidate();
+    },
+    onError: (error) => {
+      if (!error.data) {
+        return setShowToast(true);
+      }
+      if (
+        error.data.code === "BAD_REQUEST" &&
+        error.data?.stack?.includes("invalid_string")
+      ) {
+        return setInputError(
+          "Hey there! 😊 Please use only emojis in this input. 🚀",
+        );
+      }
+      if (
+        error.data.code === "BAD_REQUEST" &&
+        error.data?.stack?.includes("too_big")
+      ) {
+        return setInputError(
+          "Oops! 😅 Your emoji message is too long. Please keep it under 280 characters. 📝",
+        );
+      }
+      if (error.data.code === "TOO_MANY_REQUESTS") {
+        return setInputError(
+          "Whoa! 😅 Slow down a bit! You've sent too many emoji requests in a short time. Please try again in a moment. 🕒",
+        );
+      }
+      return setShowToast(true);
+    },
   });
 
-  const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (event) => {
-    setValue(event.target.value)
-  }
+  const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (
+    event,
+  ) => {
+    setValue(event.target.value);
+  };
 
   const handleOpenChange = () => {
-    setValue('');
+    setValue("");
+    setInputError("");
     setOpen((value) => !value);
-  }
+  };
 
   const handleSubmit = () => {
-    mutate({ content: value })
-  }
+    mutate({ content: value });
+  };
 
   if (!user) return null;
   const { imageUrl, username } = user;
 
   return (
-    <Root open={open} onOpenChange={handleOpenChange} >
+    <Root open={open} onOpenChange={handleOpenChange}>
       <div className="flex w-full gap-2">
         <ProfileImage src={imageUrl} />
-        <Trigger className="cursor-text w-full text-slate-500 text-start focus:outline-none">
-          Type some emojis!! <span className="font-['Apple_Color_Emoji']">☺</span>️
+        <Trigger className="w-full cursor-text text-start text-slate-500 focus:outline-none">
+          Type some emojis!!{" "}
+          <span className="font-['Apple_Color_Emoji']">☺</span>️
         </Trigger>
-        <button className="ml-auto rounded border border-slate-600 text-slate-500 px-4 py-1" disabled type="button">Post</button>
+        <button
+          className="ml-auto rounded border border-slate-600 px-4 py-1 text-slate-500"
+          disabled
+          type="button"
+        >
+          Post
+        </button>
       </div>
       <Portal>
-        <Overlay className="fixed inset-0 bg-opacity-60 bg-slate-800" />
-        <Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[calc(100vw-32px)] w-[620px] p-8 bg-slate-700 border border-slate-600 rounded-lg shadow-lg">
-          <Title className="font-bold text-lg text-center">New Chirp</Title>
+        <Overlay className="fixed inset-0 bg-slate-800 bg-opacity-60" />
+        <Content className="fixed left-1/2 top-1/2 w-[620px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-600 bg-slate-700 p-8 shadow-lg">
+          <Title className="text-center text-lg font-bold">New Chirp</Title>
           <div className="flex items-start gap-2">
             <ProfileImage src={imageUrl} className="mt-2" />
-            <div className="flex flex-col w-full">
+            <div className="flex w-full flex-col">
               <p className="col-start-2 font-bold">{username}</p>
               <textarea
-                className="col-start-2 w-full bg-transparent focus:outline-none resize-none font-['Apple_Color_Emoji'] text-2xl"
+                className="col-start-2 w-full resize-none bg-transparent font-['Apple_Color_Emoji','Helvetica',Arial,sans-serif] text-2xl focus:outline-none"
                 placeholder="Type some emojis!!"
                 rows={6}
                 onChange={handleTextAreaChange}
                 value={value}
                 disabled={isPosting}
               />
+              {inputError && <p>{inputError}</p>}
             </div>
           </div>
           <button
-            className="block ml-auto mt-4 rounded border px-4 py-1 border-slate-500 disabled:text-slate-500"
+            className="ml-auto mt-4 block rounded border border-slate-500 px-4 py-1 disabled:text-slate-500"
             type="button"
             disabled={value.length === 0 || isPosting}
             onClick={handleSubmit}
           >
-            {isPosting ? 'Posting...' : 'Post'}
+            {isPosting ? "Posting..." : "Post"}
           </button>
         </Content>
       </Portal>
+      <Toast
+        open={showToast}
+        onOpenChange={setShowToast}
+        title="Error"
+        bodySlot="Something unexpected happened. Please try again later"
+      />
     </Root>
-  )
-}
+  );
+};

@@ -49,7 +49,7 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
 export const createTRPCContext = (_opts: CreateNextContextOptions) => {
   const { req } = _opts;
   const auth = getAuth(req);
-  const userId = auth.userId
+  const userId = auth.userId;
 
   return {
     db,
@@ -109,8 +109,8 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       userId: ctx.userId,
-    }
-  })
-})
+    },
+  });
+});
 
-export const privateProcedure = t.procedure.use(enforceUserIsAuthed)
+export const privateProcedure = t.procedure.use(enforceUserIsAuthed);
