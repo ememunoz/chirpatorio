@@ -8,6 +8,7 @@ type PostProps = RouterOutputs["posts"]["getAll"][number];
 
 export const Post = ({ post, author: { username, imageUrl } }: PostProps) => {
   const usernameHandle = `@${username}`;
+
   return (
     <div
       key={post.id}
@@ -16,7 +17,7 @@ export const Post = ({ post, author: { username, imageUrl } }: PostProps) => {
       <Link href={usernameHandle} className="col-start-1 mt-1 self-start">
         <ProfileImage src={imageUrl ?? ""} />
       </Link>
-      <Link href={`${usernameHandle}/post/${post.id}`} className="col-start-2">
+      <div className="col-start-2">
         <div className="mb-1 flex items-baseline">
           <p className="font-bold">
             <Link href={`${usernameHandle}`}>{usernameHandle}</Link>
@@ -25,8 +26,13 @@ export const Post = ({ post, author: { username, imageUrl } }: PostProps) => {
             {formatDistance(post.createdAt, Date.now(), { addSuffix: true })}
           </p>
         </div>
-        <p className="text-2xl">{post.content}</p>
-      </Link>
+        <Link
+          href={`${usernameHandle}/post/${post.id}`}
+          className="text-left text-2xl"
+        >
+          {post.content}
+        </Link>
+      </div>
     </div>
   );
 };
