@@ -14,23 +14,23 @@ export const Post = ({ post, author: { username, imageUrl } }: PostProps) => {
       key={post.id}
       className="grid grid-cols-[max-content,1fr] gap-2 border-t border-solid border-t-slate-600 py-4"
     >
-      <Link href={usernameHandle} className="col-start-1 mt-1 self-start">
+      <Link href={`/${usernameHandle}`} className="col-start-1 mt-1 self-start">
         <ProfileImage src={imageUrl ?? ""} />
       </Link>
       <div className="col-start-2">
         <div className="mb-1 flex items-baseline">
           <p className="font-bold">
-            <Link href={`${usernameHandle}`}>{usernameHandle}</Link>
+            <Link href={`/${usernameHandle}`}>{usernameHandle}</Link>
           </p>
           <p className="ml-auto whitespace-nowrap text-sm text-slate-500">
             {formatDistance(post.createdAt, Date.now(), { addSuffix: true })}
           </p>
         </div>
         <Link
-          href={`${usernameHandle}/post/${post.id}`}
+          href={`/${usernameHandle}/post/${post.id}`}
           className="text-left text-2xl"
         >
-          {post.content}
+          <p>{post.content}</p>
         </Link>
       </div>
     </div>

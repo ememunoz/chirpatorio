@@ -2,13 +2,13 @@ import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { LoadingSpinner, Post } from "~/components";
 import { api } from "~/utils/api";
 import Head from "next/head";
-import { type GetServerSideProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import superjson from "superjson";
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (context) => {
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { db, userId: null },
@@ -23,6 +23,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       trpcState: helpers.dehydrate(),
       postId,
     },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
   };
 };
 

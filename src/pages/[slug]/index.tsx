@@ -4,13 +4,15 @@ import { ProfileFeed, ProfileImage } from "~/components";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
-import { type GetServerSideProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
+import superjson from "superjson";
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (context) => {
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { db, userId: null },
+    transformer: superjson,
   });
 
   const slug = context.params?.slug as string;
@@ -26,10 +28,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
 export default function ProfilePage(props: { username: string }) {
   const { username } = props;
   const { isSignedIn } = useUser();
 
+  console.log("Props", props);
   const { data: userData } = api.profile.getUserByUsername.useQuery({
     username,
   });
