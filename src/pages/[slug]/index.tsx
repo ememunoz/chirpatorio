@@ -1,6 +1,6 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { LoadingSpinner, Post, ProfileImage } from "~/components";
+import { ProfileFeed, ProfileImage } from "~/components";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
@@ -28,22 +28,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 export default function ProfilePage(props: { username: string }) {
   const { username } = props;
-  const { data, isLoading: isLoadingPosts } = api.posts.getAll.useQuery();
   const { isSignedIn } = useUser();
 
-  const { data: userData, isLoading } = api.profile.getUserByUsername.useQuery({
+  const { data: userData } = api.profile.getUserByUsername.useQuery({
     username,
   });
 
-  if (isLoading) {
-    console.log("LOADING");
-  }
   if (!userData)
     return <div>Sorry we could&apos;t find the page you were looking for</div>;
 
-  const { firstName, lastName, imageUrl } = userData;
-
-  if (!data && !isLoadingPosts) return <div>No data</div>;
+  const { firstName, lastName, imageUrl, id: userId } = userData;
 
   return (
     <>
@@ -77,17 +71,7 @@ export default function ProfilePage(props: { username: string }) {
 
           <section className="flex flex-col gap-8">
             <h2 className="text-lg font-bold">Posts</h2>
-            {isLoadingPosts ? (
-              <div className="grid">
-                <LoadingSpinner className="place-self-center" />
-              </div>
-            ) : (
-              <div>
-                {data.map((post) => (
-                  <Post key={post.post.id} {...post} />
-                ))}
-              </div>
-            )}
+            <ProfileFeed userId={userId} />
           </section>
         </div>
       </main>
