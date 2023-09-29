@@ -1,6 +1,5 @@
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { ProfileFeed, ProfileImage } from "~/components";
+import { Navigation, ProfileFeed, ProfileImage } from "~/components";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
 import { api } from "~/utils/api";
@@ -37,7 +36,6 @@ export const getStaticPaths: GetStaticPaths = () => {
 
 export default function ProfilePage(props: { username: string }) {
   const { username } = props;
-  const { isSignedIn } = useUser();
 
   console.log("Props", props);
   const { data: userData } = api.profile.getUserByUsername.useQuery({
@@ -45,7 +43,7 @@ export default function ProfilePage(props: { username: string }) {
   });
 
   if (!userData)
-    return <div>Sorry we could&apos;t find the page you were looking for</div>;
+    return <div>{`Sorry we couldn't find the page you were looking for`}</div>;
 
   const { firstName, lastName, imageUrl, id: userId } = userData;
 
@@ -56,10 +54,7 @@ export default function ProfilePage(props: { username: string }) {
           {firstName} {lastName} (@{username}) • Chirpatorio
         </title>
       </Head>
-      <nav className="fixed left-0 right-0 top-0 flex h-[74px] items-center gap-4 p-4">
-        {!isSignedIn && <SignInButton />}
-        {isSignedIn && <SignOutButton />}
-      </nav>
+      <Navigation />
       <main className="wrapper relative top-[74px]">
         <div className="flex flex-col gap-4 p-4">
           <div className="grid grid-cols-[1fr,84px]">
@@ -72,11 +67,12 @@ export default function ProfilePage(props: { username: string }) {
               src={imageUrl}
             />
           </div>
+          <p>This site was built using Create T3 stack.</p>
+          <p>Next.js, tRPC, TypeScript, Tailwind, Prisma, and more</p>
           <p>
             Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatem
             eveniet quos libero dignissimos possimus omnis impedit pariatur
-            cumque placeat earum, voluptatum, sit deleniti dolor magnam mollitia
-            obcaecati inventore voluptas excepturi?
+            cumque placeat earum?
           </p>
 
           <section className="flex flex-col gap-8">
