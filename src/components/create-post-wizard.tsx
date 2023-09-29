@@ -7,10 +7,11 @@ import {
   Title,
   Trigger,
 } from "@radix-ui/react-dialog";
-import { type ChangeEventHandler, useState, KeyboardEventHandler } from "react";
+import { api } from "~/utils/api";
+import { useState } from "react";
+import type { ChangeEventHandler, KeyboardEventHandler } from "react";
 
 import { ProfileImage } from "./profile-image";
-import { api } from "~/utils/api";
 import { Toast } from "./toast";
 
 export const CreatePostWizard = () => {
@@ -28,26 +29,28 @@ export const CreatePostWizard = () => {
       void ctx.posts.getAll.invalidate();
     },
     onError: (error) => {
-      if (!error.data) {
+      const errorCode = error.data?.code;
+      const errorMessage = error.data?.zodError?.fieldErrors.content;
+      if (!errorCode || !errorMessage) {
         return setShowToast(true);
       }
       if (
-        error.data.code === "BAD_REQUEST" &&
-        error.data?.stack?.includes("invalid_string")
+        errorCode === "BAD_REQUEST" &&
+        errorMessage.includes("Invalid emoji")
       ) {
         return setInputError(
           "Hey there! 😊 Please use only emojis in this input. 🚀",
         );
       }
       if (
-        error.data.code === "BAD_REQUEST" &&
-        error.data?.stack?.includes("too_big")
+        errorCode === "BAD_REQUEST" &&
+        errorMessage.includes("String must contain at most")
       ) {
         return setInputError(
           "Oops! 😅 Your emoji message is too long. Please keep it under 280 characters. 📝",
         );
       }
-      if (error.data.code === "TOO_MANY_REQUESTS") {
+      if (errorCode === "TOO_MANY_REQUESTS") {
         return setInputError(
           "Whoa! 😅 Slow down a bit! You've sent too many emoji requests in a short time. Please try again in a moment. 🕒",
         );

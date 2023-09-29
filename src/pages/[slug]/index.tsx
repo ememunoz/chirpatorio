@@ -61,7 +61,7 @@ export default function ProfilePage(props: { username: string }) {
             <h1 className="col-start-1 text-2xl font-bold">
               {firstName} {lastName}
             </h1>
-            <p className="col-start-1 mb-4">{username}</p>
+            <p className="col-start-1 mb-4">@{username}</p>
             <ProfileImage
               className="col-start-2 row-span-2 row-start-1 h-full w-full"
               src={imageUrl}
